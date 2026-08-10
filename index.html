@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monty Hall — Simulate &amp; Play</title>
+<meta name="description" content="Run two infinite Monty Hall simulations side by side — stay vs. switch — and play the game yourself.">
+<meta name="color-scheme" content="light dark">
+<link rel="stylesheet" href="assets/css/styles.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚪</text></svg>">
+<script>
+  // Stamp the saved theme before first paint so the page never flashes.
+  try {
+    var t = localStorage.getItem('monty-hall-theme');
+    if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+  } catch (e) {}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">🚪</span>
+      <span class="brand-text">
+        <strong>Monty Hall</strong>
+        <span class="brand-sub">stay or switch?</span>
+      </span>
+    </div>
+
+    <div class="tabs" role="tablist" aria-label="Sections">
+      <button class="tab" id="tab-simulate" role="tab" aria-selected="true" aria-controls="panel-simulate">Simulate</button>
+      <button class="tab" id="tab-play" role="tab" aria-selected="false" aria-controls="panel-play" tabindex="-1">Play</button>
+    </div>
+
+    <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch color theme">
+      <span class="theme-icon" aria-hidden="true"></span>
+    </button>
+  </div>
+</header>
+
+<main id="main" class="wrap">
+
+  <!-- ── Simulate ───────────────────────────────────────────────── -->
+  <section id="panel-simulate" role="tabpanel" aria-labelledby="tab-simulate" tabindex="0">
+
+    <div class="intro">
+      <h1>Two strategies, one experiment</h1>
+      <p>
+        Two simulations run at the same time on identical rules: the left contestant
+        <strong>always keeps</strong> the first door, the right contestant
+        <strong>always switches</strong> after the host reveals a goat. Each chart tracks that
+        strategy's win rate as the trial count grows — they converge on
+        <span class="nowrap">1&#8202;/&#8202;3</span> and <span class="nowrap">2&#8202;/&#8202;3</span>.
+      </p>
+    </div>
+
+    <div class="controls" role="group" aria-label="Simulation controls">
+      <button class="btn btn-primary" id="sim-toggle" type="button" aria-pressed="false">
+        <span class="btn-icon" aria-hidden="true">▶</span><span id="sim-toggle-label">Run simulations</span>
+      </button>
+      <button class="btn" id="sim-reset" type="button">Reset</button>
+
+      <div class="seg" role="radiogroup" aria-label="Speed">
+        <button class="seg-btn" role="radio" aria-checked="false" data-speed="25">Slow</button>
+        <button class="seg-btn" role="radio" aria-checked="true" data-speed="120000">Fast</button>
+        <button class="seg-btn" role="radio" aria-checked="false" data-speed="4000000">Turbo</button>
+      </div>
+
+      <label class="switch">
+        <input type="checkbox" id="log-scale" checked>
+        <span>Log trial axis</span>
+      </label>
+
+      <p class="controls-status" id="sim-status" role="status">Idle — 0 trials per strategy.</p>
+    </div>
+
+    <div class="sim-grid">
+      <!-- Stay -->
+      <article class="card sim-card" data-series="stay">
+        <header class="card-head">
+          <span class="series-key" aria-hidden="true"></span>
+          <h2>Always stay</h2>
+          <p class="card-sub">Keeps the door picked first, every time.</p>
+        </header>
+
+        <div class="stats">
+          <div class="stat stat-lead">
+            <span class="stat-label">Win rate</span>
+            <span class="stat-value" data-stat="rate">—</span>
+            <span class="stat-foot">expected 33.3%</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Wins</span>
+            <span class="stat-value stat-sm" data-stat="wins">0</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Trials</span>
+            <span class="stat-value stat-sm" data-stat="trials">0</span>
+          </div>
+        </div>
+
+        <div class="chart-wrap">
+          <canvas class="chart" data-chart="stay" role="img"
+                  aria-label="Win rate of the stay strategy over the number of trials, converging toward 33.3 percent."></canvas>
+        </div>
+
+        <details class="table-view">
+          <summary>Data table</summary>
+          <div class="table-scroll">
+            <table data-table="stay">
+              <caption>Sampled win rate of the stay strategy</caption>
+              <thead><tr><th scope="col">Trials</th><th scope="col">Win rate</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </details>
+      </article>
+
+      <!-- Switch -->
+      <article class="card sim-card" data-series="switch">
+        <header class="card-head">
+          <span class="series-key" aria-hidden="true"></span>
+          <h2>Always switch</h2>
+          <p class="card-sub">Takes the other unopened door, every time.</p>
+        </header>
+
+        <div class="stats">
+          <div class="stat stat-lead">
+            <span class="stat-label">Win rate</span>
+            <span class="stat-value" data-stat="rate">—</span>
+            <span class="stat-foot">expected 66.7%</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Wins</span>
+            <span class="stat-value stat-sm" data-stat="wins">0</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Trials</span>
+            <span class="stat-value stat-sm" data-stat="trials">0</span>
+          </div>
+        </div>
+
+        <div class="chart-wrap">
+          <canvas class="chart" data-chart="switch" role="img"
+                  aria-label="Win rate of the switch strategy over the number of trials, converging toward 66.7 percent."></canvas>
+        </div>
+
+        <details class="table-view">
+          <summary>Data table</summary>
+          <div class="table-scroll">
+            <table data-table="switch">
+              <caption>Sampled win rate of the switch strategy</caption>
+              <thead><tr><th scope="col">Trials</th><th scope="col">Win rate</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </details>
+      </article>
+    </div>
+
+    <p class="verdict" id="verdict" role="status">Start the run to compare the two strategies.</p>
+  </section>
+
+  <!-- ── Play ───────────────────────────────────────────────────── -->
+  <section id="panel-play" role="tabpanel" aria-labelledby="tab-play" tabindex="0" hidden>
+
+    <div class="intro">
+      <h1>Your turn behind the doors</h1>
+      <p>
+        One car, two goats. Pick a door, watch the host open a goat door that is
+        neither yours nor the car, then decide: keep your door, or take the other one?
+      </p>
+    </div>
+
+    <article class="card game-card">
+      <p class="prompt" id="game-prompt" role="status">Pick a door to begin.</p>
+
+      <div class="doors" id="doors">
+        <button class="door" type="button" data-door="0">
+          <span class="door-face">
+            <span class="door-number">1</span>
+            <span class="door-knob" aria-hidden="true"></span>
+          </span>
+          <span class="door-prize" aria-hidden="true"></span>
+          <span class="door-tag"></span>
+        </button>
+        <button class="door" type="button" data-door="1">
+          <span class="door-face">
+            <span class="door-number">2</span>
+            <span class="door-knob" aria-hidden="true"></span>
+          </span>
+          <span class="door-prize" aria-hidden="true"></span>
+          <span class="door-tag"></span>
+        </button>
+        <button class="door" type="button" data-door="2">
+          <span class="door-face">
+            <span class="door-number">3</span>
+            <span class="door-knob" aria-hidden="true"></span>
+          </span>
+          <span class="door-prize" aria-hidden="true"></span>
+          <span class="door-tag"></span>
+        </button>
+      </div>
+
+      <div class="game-actions" id="game-actions" hidden>
+        <button class="btn btn-primary" id="btn-switch" type="button">Switch doors</button>
+        <button class="btn" id="btn-stay" type="button">Keep my door</button>
+      </div>
+
+      <div class="game-actions" id="game-again" hidden>
+        <button class="btn btn-primary" id="btn-again" type="button">Play again</button>
+      </div>
+    </article>
+
+    <article class="card score-card">
+      <header class="card-head">
+        <h2>Your record</h2>
+        <p class="card-sub">Saved in this browser only.</p>
+      </header>
+      <div class="score-grid">
+        <div class="stat">
+          <span class="stat-label"><span class="series-key key-stay" aria-hidden="true"></span> Kept the door</span>
+          <span class="stat-value stat-sm" id="score-stay">— <span class="stat-unit">(0 of 0)</span></span>
+        </div>
+        <div class="stat">
+          <span class="stat-label"><span class="series-key key-switch" aria-hidden="true"></span> Switched doors</span>
+          <span class="stat-value stat-sm" id="score-switch">— <span class="stat-unit">(0 of 0)</span></span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Games played</span>
+          <span class="stat-value stat-sm" id="score-total">0</span>
+        </div>
+      </div>
+      <button class="btn btn-quiet" id="score-reset" type="button">Clear record</button>
+    </article>
+
+    <details class="card explain">
+      <summary>Why switching wins twice as often</summary>
+      <p>
+        Your first pick is right <span class="nowrap">1&#8202;/&#8202;3</span> of the time, so the car is behind one of the
+        other two doors <span class="nowrap">2&#8202;/&#8202;3</span> of the time. The host never opens the car door and never
+        opens yours — so when they open a goat, that whole <span class="nowrap">2&#8202;/&#8202;3</span> collapses onto the single
+        door left standing. Staying wins with your original <span class="nowrap">1&#8202;/&#8202;3</span>; switching wins with the
+        other <span class="nowrap">2&#8202;/&#8202;3</span>.
+      </p>
+      <p>
+        The host's knowledge is what does the work. If they opened a door at random and it
+        happened to show a goat, both remaining doors would sit at <span class="nowrap">1&#8202;/&#8202;2</span> and switching
+        would gain you nothing.
+      </p>
+    </details>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p>
+      Problem posed by Steve Selvin (1975), popularised by Marilyn vos Savant (1990) —
+      <a href="https://en.wikipedia.org/wiki/Monty_Hall_problem" rel="noopener">background on Wikipedia</a>.
+    </p>
+  </div>
+</footer>
+
+<script type="module" src="assets/js/app.js"></script>
+</body>
+</html>
