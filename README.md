@@ -20,17 +20,6 @@ python3 -m http.server 8000
 # → http://localhost:8000
 ```
 
-## Deploying to GitHub Pages
-
-[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) publishes the repo root
-on every push to `main`. One-time setup in the repository:
-
-1. **Settings → Pages → Build and deployment → Source: GitHub Actions.**
-2. Push to `main` (or run the workflow manually from the Actions tab).
-
-The deployed URL appears on the workflow run and under Settings → Pages —
-`https://<user>.github.io/<repo>/`.
-
 ## Layout
 
 | Path | What's in it |
